@@ -1,6 +1,8 @@
 const path = require('path')
 
 const electron = require('electron')
+const { CleanPlugin } = require('webpack')
+const { contextIsolated } = require('process')
 const {app, BrowserWindow, Tray} = electron
 
 let mainWindow
@@ -25,11 +27,23 @@ app.on('ready', ()=>{
     const iconPath = path.join(__dirname, `./src/assets/${iconName}`)
     trayIcon = new Tray(iconPath)
 
-    trayIcon.on('click', ()=> {
+    trayIcon.on('click', (event, bounds)=> {
+        // Click event bounds
+        const { x, y} = bounds
+
+        // Window height and width
+        const {height, width} = mainWindow.getBounds()
+        
         if(mainWindow.isVisible()){
             mainWindow.hide()
         } else {
             mainWindow.show()
+            mainWindow.setBounds(
+                {x: x - width/ 2, 
+                 y: process.platform === 'darwin' ? y : y - height,
+                 height,
+                 width
+                })
         }
         
     })
