@@ -1,9 +1,10 @@
 const path = require('path')
-
 const electron = require('electron')
+const TimerTray =require('./app/timer_tray')
+
 const { CleanPlugin } = require('webpack')
 const { contextIsolated } = require('process')
-const {app, BrowserWindow, Tray} = electron
+const {app, BrowserWindow} = electron
 
 let mainWindow
 let trayIcon = null
@@ -25,7 +26,7 @@ app.on('ready', ()=>{
 
     const iconName = process.platform === 'win32' ? 'windows-icon.png' : 'iconTemplate.png'
     const iconPath = path.join(__dirname, `./src/assets/${iconName}`)
-    trayIcon = new Tray(iconPath)
+    trayIcon = new TimerTray(iconPath)
 
     trayIcon.on('click', (event, bounds)=> {
         // Click event bounds
@@ -37,13 +38,13 @@ app.on('ready', ()=>{
         if(mainWindow.isVisible()){
             mainWindow.hide()
         } else {
+            mainWindow.setBounds({
+                x: x - width/ 2, 
+                y: process.platform === 'darwin' ? y : y - height,
+                height,
+                width
+            })
             mainWindow.show()
-            mainWindow.setBounds(
-                {x: x - width/ 2, 
-                 y: process.platform === 'darwin' ? y : y - height,
-                 height,
-                 width
-                })
         }
         
     })
